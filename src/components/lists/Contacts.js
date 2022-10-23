@@ -1,4 +1,7 @@
-import { List } from 'antd'
+import { List } from 'antd';
+import { useQuery } from '@apollo/client';
+import { GET_CONTACTS } from '../../queries';
+import Contact from '../listItems/Contact';
 
 const getStyles = () => ({
     list: {
@@ -10,9 +13,19 @@ const getStyles = () => ({
 const Contacts = () => {
     const styles = getStyles();
 
+    const { loading, error, data } = useQuery(GET_CONTACTS);
+    if (loading) return 'Loading...';
+    if (error) return `Error! ${error.message}`;
+
+    console.log('contacts data: ', data.contacts)
+
     return (
-        <List>
-            <List.Item>Hello</List.Item>
+        <List grid={{gutter: 20, column: 1}} style={styles.list}>
+            {data.contacts.map(({id, firstName, lastName}) => (
+                <List.Item key={id}>
+                    <Contact id={id} firstName={firstName} lastName={lastName} />
+                </List.Item>
+            ))}
         </List>
     )
 }
