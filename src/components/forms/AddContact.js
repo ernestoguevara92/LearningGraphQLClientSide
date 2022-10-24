@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button, Form, Input } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { useMutation } from '@apollo/client';
-import { ADD_CONTACT } from '../../queries';
+import { ADD_CONTACT, GET_CONTACTS } from '../../queries';
 
 const AddContact = () => {
     const [id] = useState(uuidv4());
@@ -16,9 +16,25 @@ const AddContact = () => {
     }, []);
 
     const onFinish = values => {
-        const { firstName, LastName} = values;
-        console.log('First Name: ', firstName);
-        console.log('Last Name: ', LastName);
+        const { firstName, lastName} = values;
+        
+        addContact({
+            variables: {
+                id,
+                firstName,
+                lastName
+            },
+            update: (cache, { data: { addContact } }) => {
+                const data = cache.readQuery({ query: GET_CONTACTS})
+                cache.writeQuery({
+                    query: GET_CONTACTS,
+                    data: {
+                        ...data,
+                        contacts: [...data.contacts, addContact]
+                    }
+                })
+            }
+        });
     }
 
     return (
